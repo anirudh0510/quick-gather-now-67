@@ -1,4 +1,3 @@
-
 import { createClient, SupabaseClient, AuthError } from '@supabase/supabase-js';
 
 // Get environment variables
@@ -13,7 +12,11 @@ const createAuthError = (message: string): AuthError => {
   const error = new Error(message) as AuthError;
   error.code = 'not_configured';
   error.status = 400;
-  error.__isAuthError = true;
+  // Using AuthError properties safely
+  Object.defineProperty(error, '__isAuthError', {
+    value: true,
+    enumerable: true
+  });
   return error;
 };
 
@@ -43,7 +46,24 @@ if (supabaseUrl && supabaseAnonKey) {
         data: { user: null, session: null, weakPassword: null }, 
         error: createAuthError('Supabase not configured') 
       }),
-      signOut: () => Promise.resolve({ error: null })
+      signOut: () => Promise.resolve({ error: null }),
+      // Add minimal implementation of other required properties
+      storageKey: "sb-session",
+      autoRefreshToken: {
+        value: false,
+        setTo: () => {}
+      },
+      // Add other required methods as empty implementations
+      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+      refreshSession: () => Promise.resolve({ data: { session: null, user: null }, error: null }),
+      setSession: () => Promise.resolve({ data: { session: null, user: null }, error: null }),
+      // Mock admin and mfa objects
+      admin: {},
+      mfa: {},
+      // Other required properties
+      url: undefined,
+      headers: {},
+      detectSessionInUrl: () => ({ data: { session: null }, error: null }),
     },
     from: () => ({
       select: () => {
@@ -115,10 +135,18 @@ if (supabaseUrl && supabaseAnonKey) {
         };
         return builder;
       },
-      // Adding missing properties
-      url: 'mock-url',
+      // Adding missing properties with correct types
+      url: new URL('https://example.com'),
       headers: {},
-      upsert: () => ({})
+      upsert: () => {
+        const builder: any = { 
+          data: null, 
+          error: new Error('Supabase not configured'),
+          select: () => builder,
+          single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
+        };
+        return builder;
+      }
     })
   };
 }
