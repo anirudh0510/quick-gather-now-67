@@ -17,16 +17,95 @@ if (supabaseUrl && supabaseAnonKey) {
   supabase = {
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      signUp: () => Promise.resolve({ error: new Error('Supabase not configured') }),
-      signInWithPassword: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      onAuthStateChange: () => ({ 
+        data: { 
+          subscription: { 
+            id: 'mock-id', 
+            callback: () => {}, 
+            unsubscribe: () => {} 
+          } 
+        } 
+      }),
+      signUp: () => Promise.resolve({ 
+        data: { user: null, session: null }, 
+        error: new Error('Supabase not configured') 
+      }),
+      signInWithPassword: () => Promise.resolve({ 
+        data: { user: null, session: null, weakPassword: null }, 
+        error: new Error('Supabase not configured') 
+      }),
       signOut: () => Promise.resolve({ error: null })
     },
     from: () => ({
-      select: () => ({ data: null, error: new Error('Supabase not configured') }),
-      insert: () => ({ data: null, error: new Error('Supabase not configured') }),
-      update: () => ({ data: null, error: new Error('Supabase not configured') }),
-      delete: () => ({ data: null, error: new Error('Supabase not configured') })
+      select: () => {
+        const builder: any = { 
+          data: null, 
+          error: new Error('Supabase not configured'),
+          eq: () => builder,
+          neq: () => builder,
+          gt: () => builder,
+          gte: () => builder,
+          lt: () => builder,
+          lte: () => builder,
+          range: () => builder,
+          like: () => builder,
+          ilike: () => builder,
+          is: () => builder,
+          in: () => builder,
+          contains: () => builder,
+          containedBy: () => builder,
+          filter: () => builder,
+          not: () => builder,
+          or: () => builder,
+          and: () => builder,
+          order: () => builder,
+          limit: () => builder,
+          range: () => builder,
+          single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+          maybeSingle: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
+        };
+        return builder;
+      },
+      insert: () => {
+        const builder: any = { 
+          data: null, 
+          error: new Error('Supabase not configured'),
+          select: () => builder,
+          single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
+        };
+        return builder;
+      },
+      update: () => {
+        const builder: any = { 
+          data: null, 
+          error: new Error('Supabase not configured'),
+          eq: () => builder,
+          neq: () => builder,
+          gt: () => builder,
+          gte: () => builder,
+          lt: () => builder,
+          lte: () => builder,
+          select: () => builder,
+          single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
+        };
+        return builder;
+      },
+      delete: () => {
+        const builder: any = { 
+          data: null, 
+          error: new Error('Supabase not configured'),
+          eq: () => builder,
+          neq: () => builder,
+          gt: () => builder,
+          match: () => builder,
+          gte: () => builder,
+          lt: () => builder,
+          lte: () => builder,
+          select: () => builder,
+          single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
+        };
+        return builder;
+      }
     })
   };
 }
