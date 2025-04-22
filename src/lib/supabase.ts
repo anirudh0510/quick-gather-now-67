@@ -1,3 +1,4 @@
+
 import { createClient, SupabaseClient, AuthError } from '@supabase/supabase-js';
 
 // Get environment variables
@@ -12,11 +13,7 @@ const createAuthError = (message: string): AuthError => {
   const error = new Error(message) as AuthError;
   error.code = 'not_configured';
   error.status = 400;
-  // Using AuthError properties safely
-  Object.defineProperty(error, '__isAuthError', {
-    value: true,
-    enumerable: true
-  });
+  error.__isAuthError = true;
   return error;
 };
 
@@ -46,48 +43,7 @@ if (supabaseUrl && supabaseAnonKey) {
         data: { user: null, session: null, weakPassword: null }, 
         error: createAuthError('Supabase not configured') 
       }),
-      signOut: () => Promise.resolve({ error: null }),
-      // Add minimal implementation of other required properties
-      storageKey: "sb-session",
-      // Fix: autoRefreshToken should be a boolean
-      autoRefreshToken: false,
-      // Add other required methods as empty implementations
-      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-      refreshSession: () => Promise.resolve({ data: { session: null, user: null }, error: null }),
-      setSession: () => Promise.resolve({ data: { session: null, user: null }, error: null }),
-      // Fix: Implement admin and mfa with minimum required methods
-      admin: {
-        // Minimum implementation of GoTrueAdminApi
-        listUsers: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        createUser: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        deleteUser: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        updateUserById: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        generateLink: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        inviteUserByEmail: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        resetPasswordForEmail: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        url: null,
-        headers: {},
-        fetch: () => Promise.resolve(new Response()),
-        mfa: {
-          listFactors: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-          deleteFactor: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') })
-        },
-      },
-      mfa: {
-        // Minimum implementation of GoTrueMFAApi
-        enroll: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        challenge: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        verify: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        unenroll: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        challengeAndVerify: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        getAuthenticatorAssuranceLevel: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') }),
-        listFactors: () => Promise.resolve({ data: null, error: createAuthError('Supabase not configured') })
-      },
-      // Other required properties
-      url: null,
-      headers: {},
-      // Fix: detectSessionInUrl should return a proper type, not be a function
-      detectSessionInUrl: false
+      signOut: () => Promise.resolve({ error: null })
     },
     from: () => ({
       select: () => {
@@ -159,18 +115,10 @@ if (supabaseUrl && supabaseAnonKey) {
         };
         return builder;
       },
-      // Adding missing properties with correct types
-      url: new URL('https://example.com'),
+      // Adding missing properties
+      url: 'mock-url',
       headers: {},
-      upsert: () => {
-        const builder: any = { 
-          data: null, 
-          error: new Error('Supabase not configured'),
-          select: () => builder,
-          single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
-        };
-        return builder;
-      }
+      upsert: () => ({})
     })
   };
 }
