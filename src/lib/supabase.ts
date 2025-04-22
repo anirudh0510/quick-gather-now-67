@@ -1,5 +1,5 @@
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, AuthError } from '@supabase/supabase-js';
 
 // Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -7,6 +7,15 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Create a client or a placeholder based on available credentials
 let supabase: SupabaseClient;
+
+// Helper function to create an AuthError
+const createAuthError = (message: string): AuthError => {
+  const error = new Error(message) as AuthError;
+  error.code = 'not_configured';
+  error.status = 400;
+  error.__isAuthError = true;
+  return error;
+};
 
 if (supabaseUrl && supabaseAnonKey) {
   supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -28,11 +37,11 @@ if (supabaseUrl && supabaseAnonKey) {
       }),
       signUp: () => Promise.resolve({ 
         data: { user: null, session: null }, 
-        error: new Error('Supabase not configured') 
+        error: createAuthError('Supabase not configured') 
       }),
       signInWithPassword: () => Promise.resolve({ 
         data: { user: null, session: null, weakPassword: null }, 
-        error: new Error('Supabase not configured') 
+        error: createAuthError('Supabase not configured') 
       }),
       signOut: () => Promise.resolve({ error: null })
     },
@@ -60,7 +69,7 @@ if (supabaseUrl && supabaseAnonKey) {
           and: () => builder,
           order: () => builder,
           limit: () => builder,
-          range: () => builder,
+          offset: () => builder,
           single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
           maybeSingle: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
         };
@@ -105,7 +114,11 @@ if (supabaseUrl && supabaseAnonKey) {
           single: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') })
         };
         return builder;
-      }
+      },
+      // Adding missing properties
+      url: 'mock-url',
+      headers: {},
+      upsert: () => ({})
     })
   };
 }
