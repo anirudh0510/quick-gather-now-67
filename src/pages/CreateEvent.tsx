@@ -1,8 +1,29 @@
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import EventCreationForm from "@/components/EventCreationForm";
+import { useToast } from "@/components/ui/use-toast";
 
 const CreateEvent = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to create an event.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [user, navigate, toast]);
+
+  if (!user) return null;
+
   return (
     <>
       <Navbar />
